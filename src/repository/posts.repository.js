@@ -28,3 +28,18 @@ export const insertTrends = (idPost, hashtagsIds) => {
     return db.query('INSERT INTO trends ("idPost", "idHashtag") VALUES ($1, $2);', [idPost, idHashtag])
   });
 };
+
+export const selectPosts = () => {
+  return db.query(`
+    SELECT posts.id, posts."postUrl", posts."postText",
+      JSON_BUILD_OBJECT(
+        'name', users.username,
+        'pictureUrl', users."pictureUrl"
+      ) AS user
+    FROM posts
+    JOIN users ON users.id = posts."idUser"
+
+    ORDER BY posts.id DESC
+    LIMIT 20
+  ;`)
+}
