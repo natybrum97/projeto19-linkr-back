@@ -1,5 +1,5 @@
-import { stripHtml } from "string-strip-html";
 import bcrypt from "bcrypt";
+import { stripHtml } from "string-strip-html";
 import { v4 as uuid } from 'uuid';
 import { CheckRegistration, EnterRegistrationData, RegisterLogin } from "../repository/users.repository.js";
 
