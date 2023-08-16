@@ -1,8 +1,9 @@
 import { Router } from "express";
+import likesRouter from "./likes.routes.js";
+import postsRouter from "./posts.routes.js";
 import usersRouter from "./users.routes.js";
 
-const router = Router();
+const indexRouter = Router();
+indexRouter.use(usersRouter, postsRouter, likesRouter);
 
-router.use(usersRouter);
-
-export default router;
+export default indexRouter;

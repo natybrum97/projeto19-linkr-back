@@ -1,18 +1,18 @@
 import express from "express";
-import { likePost, getLikeCount, unlikePost } from "../controllers/likesController.js";
+import { getLikeCount, likePost, unlikePost } from "../controllers/likesController.js";
 
-const router = express.Router();
+const likesRouter = express.Router();
 
 // Rota para curtir um post
-router.post("/like", likePost);
+likesRouter.post("/like", likePost);
 
 // Rota para obter contagem de curtidas de um post
 
-router.get("/likes/:idPost", getLikeCount);
+likesRouter.get("/likes/:idPost", getLikeCount);
 
 // Rota para descurtir post
-router.post("/unlike", unlikePost);
+likesRouter.post("/unlike", unlikePost);
 
 
 
-export default router;
+export default likesRouter;
