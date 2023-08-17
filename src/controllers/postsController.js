@@ -1,4 +1,3 @@
-import urlMetadata from "url-metadata";
 import { insertHashtags, insertPost, insertTrends, selectPosts } from "../repository/posts.repository.js";
 import { selectSessionByToken } from "../repository/sessions.repository.js";
 
@@ -28,12 +27,8 @@ export const postPost = async (req, res) => {
 export const getPosts = async (req, res) => {
   try {
     const { rows } = await selectPosts();
-    for (let i = 0; i < rows.length; i++){
-      const { description, url, 'og:title': title, 'og:description': ogDescription, 'og:image': image } = await urlMetadata(rows[i].postUrl);
-      rows[i].urlMetaData = { title: title || url, description: ogDescription || description , image };
-    }
     res.send(rows);
-  } catch ({ detail }) {
-    res.status(500).send({ message: detail });
+  } catch ({ message }) {
+    res.status(500).send(message);
   }
-}
+};
