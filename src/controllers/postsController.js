@@ -1,4 +1,3 @@
-import axios from "axios";
 import { insertHashtags, insertPost, insertTrends, selectPosts } from "../repository/posts.repository.js";
 import { selectSessionByToken } from "../repository/sessions.repository.js";
 
@@ -28,13 +27,8 @@ export const postPost = async (req, res) => {
 export const getPosts = async (req, res) => {
   try {
     const { rows } = await selectPosts();
-    for (let i = 0; i < rows.length; i++){
-      const { data: { title, description, images } } = await axios.get(`https://jsonlink.io/api/extract?url=${rows[i].postUrl}`);
-      rows[i].urlMetaData = { title, description, image: images[0] };
-    };
-
     res.send(rows);
   } catch ({ message }) {
     res.status(500).send(message);
   }
-}
+};
