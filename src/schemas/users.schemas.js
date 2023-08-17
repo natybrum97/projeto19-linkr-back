@@ -1,9 +1,9 @@
 import Joi from "joi";
 
 export const schemaSignUp = Joi.object({
+    username: Joi.string().required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(3).required(),
-    username: Joi.string().required(),
     url: Joi.string().required()
 });
 
