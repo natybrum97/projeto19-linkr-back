@@ -23,3 +23,14 @@ export function RegisterLogin(token, user) {
     return result;
     
 }
+
+export function FindUserPostsDB(id) {
+    return db.query(`
+        SELECT p."postText", p."postUrl", u.username
+        FROM posts AS p
+        JOIN users  u ON p."idUser" = u.id
+        WHERE p."idUser" = $1
+        ORDER BY p."createdAt" DESC`
+        , [id]
+    ); 
+}
