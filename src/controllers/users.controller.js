@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import { stripHtml } from "string-strip-html";
 import { v4 as uuid } from 'uuid';
-import { CheckRegistration, EnterRegistrationData, RegisterLogin } from "../repository/users.repository.js";
+import { CheckRegistration, EnterRegistrationData, FindUserPostsDB, RegisterLogin } from "../repository/users.repository.js";
 
 export async function postSignUp (req, res) {
 
@@ -56,4 +56,16 @@ export async function postLogin (req, res) {
     } catch (err) {
       res.status(500).send(err.message);
     }
+}
+
+export async function getUserPosts(req, res) {
+  const { id } = req.params;
+
+  try {
+    const userPosts = await FindUserPostsDB(id);
+    res.status(200).send(userPosts.rows[0]);
+    
+  } catch (error) {
+    res.status(500).send(error.message);    
+  }
 }
