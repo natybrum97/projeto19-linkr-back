@@ -14,7 +14,7 @@ export const insertHashtags = async (hashtags) => {
   const selectedHashtags = await db.query(`SELECT hashtags.id, hashtags."hashtagText" FROM hashtags WHERE "hashtagText" IN (${hashtags.map(hashtag => `'${hashtag}'`).join(', ')});`);
   selectedHashtags.rows.forEach(({ id }) => hashtagsIds.push(id));
 
-  const hashTagsToInsert = hashtags.filter(hT => !selectedHashtags.rows.some(({ hashtagText }) => hashtagText === hT));
+  const hashTagsToInsert = hashtags.filter(hashtag => !selectedHashtags.rows.some(({ hashtagText }) => hashtagText === hashtag));
   if (hashTagsToInsert.length === 0) return hashtagsIds;
   const insertedHashtags = await db.query(`INSERT INTO hashtags ("hashtagText") VALUES ${hashTagsToInsert.map((_, i) => `($${i+1})`).join(', ')} RETURNING id;`, hashTagsToInsert);
   insertedHashtags.rows.forEach(({ id }) => hashtagsIds.push(id));
