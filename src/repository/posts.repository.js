@@ -32,6 +32,7 @@ export const selectPosts = () => {
   return db.query(`
     SELECT posts.id, posts."postUrl", posts."postText",
       JSON_BUILD_OBJECT(
+        'id', users.id,
         'name', users.username,
         'pictureUrl', users."pictureUrl"
       ) AS user
