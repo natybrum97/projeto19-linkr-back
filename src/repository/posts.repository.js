@@ -8,18 +8,17 @@ export const insertPost = (body, idUser) => {
   return db.query('INSERT INTO posts ("postUrl", "postText", "idUser") VALUES ($1, $2, $3) RETURNING id;', [postUrl, postText, idUser]);
 };
 
-export const insertHashtags = async (hashtag) => {
+export const insertHashtags = async (hashtags) => {
   const hashtagsIds = [];
-  for (let i = 0; i < hashtag.length; i++){
-    const selectedHashtags = await db.query('SELECT hashtags.id FROM hashtags WHERE "hashtagText" = ($1);', [hashtag[i]]);
-    if (selectedHashtags.rowCount > 0) {
-      hashtagsIds.push(selectedHashtags.rows[0].id);
-    }
-    if (selectedHashtags.rowCount === 0) {
-      const insertedHashtag = await db.query('INSERT INTO hashtags ("hashtagText") VALUES ($1) RETURNING id;', [hashtag[i]]);
-      hashtagsIds.push(insertedHashtag.rows[0].id);
-    }
-  };
+
+  const selectedHashtags = await db.query(`SELECT hashtags.id, hashtags."hashtagText" FROM hashtags WHERE "hashtagText" IN (${hashtags.map(hashtag => `'${hashtag}'`).join(', ')});`);
+  selectedHashtags.rows.forEach(({ id }) => hashtagsIds.push(id));
+
+  const hashTagsToInsert = hashtags.filter(hT => !selectedHashtags.rows.some(({ hashtagText }) => hashtagText === hT));
+  if (hashTagsToInsert.length === 0) return hashtagsIds;
+  const insertedHashtags = await db.query(`INSERT INTO hashtags ("hashtagText") VALUES ${hashTagsToInsert.map((_, i) => `($${i+1})`).join(', ')} RETURNING id;`, hashTagsToInsert);
+  insertedHashtags.rows.forEach(({ id }) => hashtagsIds.push(id));
+
   return hashtagsIds;
 };
 
