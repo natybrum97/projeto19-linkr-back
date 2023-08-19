@@ -42,12 +42,16 @@ export const insertHashtags = async (hashtags) => {
 };
 
 export const insertTrends = (idPost, hashtagsIds) => {
+<<<<<<< HEAD
   return hashtagsIds.map((idHashtag) => {
     return db.query(
       'INSERT INTO trends ("idPost", "idHashtag") VALUES ($1, $2);',
       [idPost, idHashtag]
     );
   });
+=======
+  return db.query(`INSERT INTO trends ("idPost", "idHashtag") VALUES ${hashtagsIds.map((_, i) => `(${idPost}, $${i+1})`).join(', ')}`, hashtagsIds);
+>>>>>>> 82e97c8a0bb72b4f05c54b31239c3effa395a705
 };
 
 export const selectPosts = () => {
