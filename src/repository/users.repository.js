@@ -59,3 +59,14 @@ export function FindUserPostsDB(id) {
     [id]
   );
 }
+
+export function SearchUsersByName(query) {
+  const queryString = `
+    SELECT id, username, "pictureUrl"
+    FROM users
+    WHERE username ILIKE $1;
+  `;
+
+  const result = db.query(queryString, [`%${query}%`]);
+  return result;
+}
