@@ -3,6 +3,7 @@ import {
   insertPost,
   insertTrends,
   selectPosts,
+  deletePost,
 } from "../repository/posts.repository.js";
 import { selectSessionByToken } from "../repository/sessions.repository.js";
 
@@ -37,5 +38,19 @@ export const getPosts = async (req, res) => {
     res.send(rows);
   } catch ({ message }) {
     res.status(500).send(message);
+  }
+};
+
+export const deletePostsController = async (req, res) => {
+  const { postId } = req.params;
+
+  try {
+    // Aqui você pode chamar a função de exclusão do post com o postId
+    await deletePost(postId);
+
+    res.sendStatus(204); // Resposta de sucesso (No Content) quando o post é excluído
+  } catch (error) {
+    console.error("Error:", error); // Log do erro para depuração
+    res.status(500).send({ message: error.message });
   }
 };
