@@ -36,6 +36,7 @@ export function FindUserPostsDB(id) {
     `
     SELECT JSON_BUILD_OBJECT(
         'user', JSON_BUILD_OBJECT(
+            'id', u.id,
             'name', u.username,
             'pictureUrl', u."pictureUrl"
         ),
@@ -54,7 +55,7 @@ export function FindUserPostsDB(id) {
     FROM users u
     LEFT JOIN posts p ON u.id = p."idUser"
     WHERE u.id = $1
-    GROUP BY u.username, u."pictureUrl";`,
+    GROUP BY u.id, u.username, u."pictureUrl";`,
     [id]
   );
 }
