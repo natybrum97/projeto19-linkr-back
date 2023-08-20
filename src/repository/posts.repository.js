@@ -66,6 +66,32 @@ export const selectPosts = () => {
   ;`);
 };
 
+export const updatePost = async (postText, postUrl, idPost) => {
+
+  // Exclua as entradas relacionadas às trends primeiro
+  await db.query('DELETE FROM trends WHERE "idPost" = $1', [idPost]);
+
+  // Exclua as hashtags que não estão mais associadas a nenhum trend/post
+  await db.query(`
+    DELETE FROM hashtags
+    WHERE id NOT IN (
+      SELECT DISTINCT "idHashtag" FROM trends
+    );
+  `);
+
+  const hashtags = postText.match(/#\w+/g);
+  if (hashtags) {
+    // insira novamente as hashtags
+    const hashtagsIds = await insertHashtags(hashtags);
+
+    //insira novamente as trends
+    await insertTrends(idPost, hashtagsIds);
+  }
+
+  //finalmente atualize o post
+  return db.query('UPDATE posts SET "postText" = $1, "postUrl" = $2 WHERE id = $3;', [postText, postUrl, idPost]);
+};
+
 export const deletePost = async (postId) => {
   const client = await db.connect();
 
@@ -78,7 +104,7 @@ export const deletePost = async (postId) => {
     // Exclua as entradas relacionadas aos likes depois
     await client.query('DELETE FROM likes WHERE "idPost" = $1', [postId]);
 
-    // Exclua as hashtags que não estão mais associadas a nenhum post
+    // Exclua as hashtags que não estão mais associadas a nenhum trend/post
     await client.query(`
       DELETE FROM hashtags
       WHERE id NOT IN (

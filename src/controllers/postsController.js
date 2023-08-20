@@ -1,9 +1,10 @@
 import {
+  deletePost,
   insertHashtags,
   insertPost,
   insertTrends,
   selectPosts,
-  deletePost,
+  updatePost,
 } from "../repository/posts.repository.js";
 import { selectSessionByToken } from "../repository/sessions.repository.js";
 
@@ -54,3 +55,15 @@ export const deletePostsController = async (req, res) => {
     res.status(500).send({ message: error.message });
   }
 };
+
+export const editPostById = async (req, res) => {
+  const { postId } = req.params;
+  const { postText, postUrl } = req.body;
+
+  try {
+    await updatePost(postText, postUrl, postId);
+    res.sendStatus(204);
+  } catch ({ message }) {
+    res.status(500).send(message);
+  }
+}
