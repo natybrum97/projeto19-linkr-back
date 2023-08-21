@@ -8,9 +8,6 @@ export async function getTrending(req, res) {
   try {
     const hashtagsTrends = await getTrendsDB();
 
-    if (hashtagsTrends.rowCount === 0)
-      return res.status(404).send({ message: "Nenhuma hashtag em trending!" });
-
     res.send(hashtagsTrends.rows);
   } catch (err) {
     console.log(err.message);
