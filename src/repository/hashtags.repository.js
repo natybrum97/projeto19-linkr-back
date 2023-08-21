@@ -16,6 +16,7 @@ export const getHashtagPostsDB = (okHashtag) => {
     `
     SELECT posts.id, posts."postUrl", posts."postText",
         JSON_BUILD_OBJECT(
+          'id', users.id,
           'name', users.username,
           'pictureUrl', users."pictureUrl"
         ) AS user
