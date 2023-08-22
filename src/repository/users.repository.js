@@ -74,6 +74,5 @@ export async function SearchUsersByName(token, query) {
   `;
 
   const result = await db.query(queryString, [token, `%${query}%`]);
-  console.log(result.rows);
   return result;
 }
