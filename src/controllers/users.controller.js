@@ -72,6 +72,7 @@ export async function getUserPosts(req, res) {
 
 export async function getUsersByName(req, res) {
   const { query } = req.query;
+  const { authorization } = req.headers;
 
   console.log(query);
 
@@ -80,7 +81,7 @@ export async function getUsersByName(req, res) {
 
     if (query && query.length >= 3) {
 
-      users = await SearchUsersByName(query);
+      users = await SearchUsersByName(authorization.replace("Bearer ", ""), query);
       
     } else {
 

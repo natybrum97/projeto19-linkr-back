@@ -60,13 +60,20 @@ export function FindUserPostsDB(id) {
   );
 }
 
-export function SearchUsersByName(query) {
+export async function SearchUsersByName(token, query) {
   const queryString = `
-    SELECT id, username, "pictureUrl"
+    SELECT users.id, users.username, users."pictureUrl",
+      BOOL_OR(follows."idFollower" = 
+        (SELECT sessions."idUser" FROM sessions where token = $1)
+      ) AS "followedByYou"
     FROM users
-    WHERE username ILIKE $1;
+    LEFT JOIN follows ON users.id = follows."idFollowed"
+    WHERE username ILIKE $2
+    GROUP BY users.id
+    ORDER BY "followedByYou" DESC;
   `;
 
-  const result = db.query(queryString, [`%${query}%`]);
+  const result = await db.query(queryString, [token, `%${query}%`]);
+  console.log(result.rows);
   return result;
 }
