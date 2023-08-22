@@ -4,7 +4,7 @@ export const getTrendsDB = () => {
   return db.query(
     `SELECT hashtags."hashtagText", COUNT(trends."idPost") AS "count"
         FROM hashtags 
-     JOIN trends ON hashtags.id = trends."idHashtag"
+    JOIN trends ON hashtags.id = trends."idHashtag"
         GROUP BY hashtags."hashtagText"
         ORDER BY "count" DESC LIMIT 10;`
   );
