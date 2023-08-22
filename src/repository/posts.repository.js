@@ -50,7 +50,12 @@ export const insertTrends = (idPost, hashtagsIds) => {
   });
 };
 
-export const selectPosts = () => {
+export const selectPosts = async (token) => {
+
+  const queryString = 'SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1)';
+  const { rowCount } = await db.query(queryString, [token]);
+  if (rowCount === 0) return "You don't follow anyone yet. Search for new friends!";
+
   return db.query(`
     SELECT posts.id, posts."postUrl", posts."postText",
       JSON_BUILD_OBJECT(
@@ -61,9 +66,11 @@ export const selectPosts = () => {
     FROM posts
     JOIN users ON users.id = posts."idUser"
 
+    WHERE users.id IN (${queryString})
+
     ORDER BY posts.id DESC
     LIMIT 20
-  ;`);
+  ;`, [token]);
 };
 
 export const updatePost = async (postText, postUrl, idPost) => {

@@ -74,8 +74,6 @@ export async function getUsersByName(req, res) {
   const { query } = req.query;
   const { authorization } = req.headers;
 
-  console.log(query);
-
   try {
     let users;
 
