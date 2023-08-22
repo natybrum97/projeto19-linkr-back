@@ -7,6 +7,6 @@ import { followSchema } from "../schemas/follow.schemas.js";
 const followsRouter = Router();
 
 followsRouter.post("/follow", validateAuth, validateSchema(followSchema), postFollow);
-followsRouter.get("/follow", validateAuth, validateSchema(followSchema), getFollow);
+followsRouter.get("/follow/:idFollowed", validateAuth, getFollow);
 
 export default followsRouter;

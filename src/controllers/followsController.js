@@ -16,7 +16,7 @@ export const postFollow = async (req, res) => {
 
 export const getFollow = async (req, res) => {
   const { authorization } = req.headers;
-  const { idFollowed } = req.body;
+  const { idFollowed } = req.params;
   try {
     const { rows } = await selectFollow(idFollowed, authorization.replace("Bearer ", ""));
     res.send(rows);
