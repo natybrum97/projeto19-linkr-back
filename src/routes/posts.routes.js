@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   deletePostsController,
   editPostById,
+  getNewPosts,
   getPosts,
   postPost,
 } from "../controllers/postsController.js";
@@ -13,6 +14,7 @@ const postsRouter = Router();
 
 postsRouter.post("/post", validateAuth, validateSchema(postSchema), postPost);
 postsRouter.get("/post", validateAuth, getPosts);
+postsRouter.post("/getNewPosts", validateAuth, getNewPosts);
 postsRouter.put("/post/:postId", validateAuth, validateSchema(postSchema), editPostById);
 postsRouter.delete("/post/:postId", validateAuth, deletePostsController);
 

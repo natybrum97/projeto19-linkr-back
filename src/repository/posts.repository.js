@@ -25,9 +25,8 @@ export const insertHashtags = async (hashtags) => {
   );
   selectedHashtags.rows.forEach(({ id }) => hashtagsIds.push(id));
 
-  const hashTagsToInsert = hashtags.filter(
-    (hashtag) =>
-      !selectedHashtags.rows.some(({ hashtagText }) => hashtagText === hashtag)
+  const hashTagsToInsert = hashtags.filter((hashtag) =>
+    !selectedHashtags.rows.some(({ hashtagText }) => hashtagText === hashtag)
   );
   if (hashTagsToInsert.length === 0) return hashtagsIds;
   const insertedHashtags = await db.query(
@@ -42,12 +41,7 @@ export const insertHashtags = async (hashtags) => {
 };
 
 export const insertTrends = (idPost, hashtagsIds) => {
-  return hashtagsIds.map((idHashtag) => {
-    return db.query(
-      'INSERT INTO trends ("idPost", "idHashtag") VALUES ($1, $2);',
-      [idPost, idHashtag]
-    );
-  });
+  return db.query(`INSERT INTO trends ("idPost", "idHashtag") VALUES ${hashtagsIds.map((_, i) => `(${idPost}, $${i+1})`).join(', ')}`, hashtagsIds);
 };
 
 export const selectPosts = async (token) => {
@@ -72,6 +66,26 @@ export const selectPosts = async (token) => {
     LIMIT 20
   ;`, [token]);
 };
+
+export const selectNewPosts = (token, idPosts) => {
+  return db.query(`
+    SELECT posts.id, posts."postUrl", posts."postText",
+      JSON_BUILD_OBJECT(
+        'id', users.id,
+        'name', users.username,
+        'pictureUrl', users."pictureUrl"
+      ) AS user
+    FROM posts
+    JOIN users ON users.id = posts."idUser"
+
+    WHERE 
+      users.id IN (SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1))
+      AND posts.id NOT IN (${idPosts.map(id => `'${id}'`).join(", ")})
+      AND posts.id > ${idPosts[idPosts.length-1]}
+
+    ORDER BY posts.id DESC
+  ;`, [token]);
+}
 
 export const updatePost = async (postText, postUrl, idPost) => {
 

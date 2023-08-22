@@ -3,6 +3,7 @@ import {
   insertHashtags,
   insertPost,
   insertTrends,
+  selectNewPosts,
   selectPosts,
   updatePost,
 } from "../repository/posts.repository.js";
@@ -44,6 +45,17 @@ export const getPosts = async (req, res) => {
     res.status(500).send(message);
   }
 };
+
+export const getNewPosts = async (req, res) => {
+  const { authorization } = req.headers;
+  try {
+    const { rows } = await selectNewPosts(authorization.replace("Bearer ", ""), req.body);
+    
+    res.send(rows);
+  } catch ({ message }) {
+    res.status(500).send(message);
+  }
+}
 
 export const deletePostsController = async (req, res) => {
   const { postId } = req.params;
