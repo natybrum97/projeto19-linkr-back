@@ -1,7 +1,13 @@
 import { db } from "../database/database.connection.js";
 
 export const getTrendsDB = () => {
-  return db.query(`SELECT "hashtagText" FROM hashtags;`);
+  return db.query(
+    `SELECT hashtags."hashtagText", COUNT(trends."idPost") AS "count"
+        FROM hashtags 
+     JOIN trends ON hashtags.id = trends."idHashtag"
+        GROUP BY hashtags."hashtagText"
+        ORDER BY "count" DESC LIMIT 10;`
+  );
 };
 
 export const findHashtagDB = (okHashtag) => {
