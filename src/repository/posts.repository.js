@@ -44,7 +44,10 @@ export const insertTrends = (idPost, hashtagsIds) => {
   return db.query(`INSERT INTO trends ("idPost", "idHashtag") VALUES ${hashtagsIds.map((_, i) => `(${idPost}, $${i+1})`).join(', ')}`, hashtagsIds);
 };
 
-export const selectPosts = async (token) => {
+export const selectPosts = async (token, query) => {
+  const { page, qtd } = query;
+  const params = [token];
+  if (page && qtd) params.push(qtd, (page - 1) * qtd);
 
   const queryString = 'SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1)';
   const { rowCount } = await db.query(queryString, [token]);
@@ -63,8 +66,10 @@ export const selectPosts = async (token) => {
     WHERE users.id IN (${queryString})
 
     ORDER BY posts.id DESC
-    LIMIT 20
-  ;`, [token]);
+    ${page && qtd 
+      ? 'LIMIT $2 OFFSET $3' : ''
+    }
+  ;`, params);
 };
 
 export const selectNewPosts = (token, idPosts) => {

@@ -37,7 +37,7 @@ export const postPost = async (req, res) => {
 export const getPosts = async (req, res) => {
   const { authorization } = req.headers;
   try {
-    const posts = await selectPosts(authorization.replace("Bearer ", ""));
+    const posts = await selectPosts(authorization.replace("Bearer ", ""), req.query);
     if (posts === "You don't follow anyone yet. Search for new friends!") return res.send(posts);
     
     res.send(posts.rows);

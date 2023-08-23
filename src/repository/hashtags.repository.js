@@ -17,7 +17,11 @@ export const findHashtagDB = (okHashtag) => {
   );
 };
 
-export const getHashtagPostsDB = (okHashtag) => {
+export const getHashtagPostsDB = (okHashtag, query) => {
+  const { page, qtd } = query;
+  const params = [okHashtag];
+  if (page && qtd) params.push(qtd, (page - 1) * qtd);
+
   return db.query(
     `
     SELECT posts.id, posts."postUrl", posts."postText",
@@ -30,8 +34,11 @@ export const getHashtagPostsDB = (okHashtag) => {
         JOIN trends ON posts.id = trends."idPost"
         JOIN hashtags ON hashtags.id = trends."idHashtag"
         WHERE hashtags."hashtagText" = $1
-        ORDER BY posts.id DESC;
-    `,
-    [okHashtag]
+        ORDER BY posts.id DESC
+
+    ${page && qtd 
+      ? 'LIMIT $2 OFFSET $3' : ''
+    }
+    ;`, params
   );
 };

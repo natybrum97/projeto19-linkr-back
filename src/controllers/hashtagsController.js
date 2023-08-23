@@ -26,7 +26,7 @@ export async function getHashtagPosts(req, res) {
     if (findHashtag.rowCount === 0)
       return res.status(404).send({ message: "Hashtag não encontrada!" });
 
-    const hashtagPosts = await getHashtagPostsDB(okHashtag);
+    const hashtagPosts = await getHashtagPostsDB(okHashtag, req.query);
 
     if (hashtagPosts.rowCount === 0)
       return res.send({ message: "Sem posts com essa hashtag!" });

@@ -62,8 +62,8 @@ export async function getUserPosts(req, res) {
   const { id } = req.params;
 
   try {
-    const userPosts = await FindUserPostsDB(id);
-    res.status(200).send(userPosts.rows[0]);
+    const userPosts = await FindUserPostsDB(id, req.query);
+    res.status(200).send(userPosts);
     
   } catch (error) {
     res.status(500).send(error.message);    

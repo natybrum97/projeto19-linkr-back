@@ -31,33 +31,33 @@ export function RegisterLogin(token, user) {
   return result;
 }
 
-export function FindUserPostsDB(id) {
-  return db.query(
-    `
+export async function FindUserPostsDB(id, query) {
+  const { page, qtd } = query;
+  const params = [id];
+  if (page && qtd) params.push(qtd, (page - 1) * qtd);
+
+  const user = await db.query(`
     SELECT JSON_BUILD_OBJECT(
-        'user', JSON_BUILD_OBJECT(
-            'id', u.id,
-            'name', u.username,
-            'pictureUrl', u."pictureUrl"
-        ),
-        'userPosts',
-        CASE
-            WHEN COUNT(p.id) = 0 THEN '[]'::json
-            ELSE JSON_AGG(
-                JSON_BUILD_OBJECT(
-                    'id', p.id,
-                    'postText', p."postText",
-                    'postUrl', p."postUrl"
-                ) ORDER BY p."createdAt" DESC
-            ) 
-        END
-    ) AS "userPosts"
+      'user', JSON_BUILD_OBJECT(
+        'id', u.id,
+        'name', u.username,
+        'pictureUrl', u."pictureUrl"
+      )) AS "userPosts"
     FROM users u
-    LEFT JOIN posts p ON u.id = p."idUser"
     WHERE u.id = $1
-    GROUP BY u.id, u.username, u."pictureUrl";`,
-    [id]
+    ;`, [id]
   );
+  const { rows } = await db.query(`
+    SELECT id, "postText", "postUrl"
+    FROM posts
+    WHERE posts."idUser" = $1
+    ${page && qtd 
+      ? 'LIMIT $2 OFFSET $3' : ''
+    }
+  ;`, params);
+  
+  user.rows[0].userPosts.userPosts = [...rows];
+  return user.rows[0];
 }
 
 export async function SearchUsersByName(token, query) {
