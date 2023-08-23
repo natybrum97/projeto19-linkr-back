@@ -29,7 +29,7 @@ export async function getHashtagPosts(req, res) {
     const hashtagPosts = await getHashtagPostsDB(okHashtag, req.query);
 
     if (hashtagPosts.rowCount === 0)
-      return res.send({ message: "Sem posts com essa hashtag!" });
+      return res.status(404).send({ message: "Sem posts com essa hashtag!" });
 
     res.status(200).send(hashtagPosts.rows);
   } catch (err) {
