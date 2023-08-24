@@ -59,12 +59,13 @@ export const selectPosts = async (token, query) => {
         'id', users.id,
         'name', users.username,
         'pictureUrl', users."pictureUrl"
-      ) AS user
+      ) AS user,
+      COUNT(reposts.id) AS repostCount
     FROM posts
     JOIN users ON users.id = posts."idUser"
-
+    LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
     WHERE users.id IN (${queryString})
-
+    GROUP BY posts.id, users.id
     ORDER BY posts.id DESC
     ${page && qtd 
       ? 'LIMIT $2 OFFSET $3' : ''
@@ -79,15 +80,16 @@ export const selectNewPosts = (token, idPosts) => {
         'id', users.id,
         'name', users.username,
         'pictureUrl', users."pictureUrl"
-      ) AS user
+      ) AS user,
+      COUNT(reposts.id) AS repostCount
     FROM posts
     JOIN users ON users.id = posts."idUser"
-
+    LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
     WHERE 
       users.id IN (SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1))
       AND posts.id NOT IN (${idPosts.map(id => `'${id}'`).join(", ")})
       AND posts.id > ${idPosts[idPosts.length-1]}
-
+    GROUP BY posts.id, users.id
     ORDER BY posts.id DESC
   ;`, [token]);
 }
@@ -149,3 +151,13 @@ export const deletePost = async (postId) => {
     client.release();
   }
 };
+
+export const sharePostDB = async (body) => {
+  const { idOriginalPost, idUserOriginalPost, idUserRepost, } = body;
+
+  return db.query(`
+    INSERT INTO reposts ("idOriginalPost", "idUserOriginalPost", "idUserRepost")
+    VALUES ($1, $2, $3)`,
+    [idOriginalPost, idUserOriginalPost, idUserRepost]
+  );
+}
