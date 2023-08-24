@@ -16,7 +16,7 @@ async function createComment(userId, postId, content) {
 
 async function getCommentsByPost(postId) {
   const query = `
-    SELECT c.id, c.content, u.username, u."pictureUrl"
+    SELECT c.id, c.content, u.username, u."pictureUrl", u.id AS user_id
     FROM comments c
     INNER JOIN users u ON c.user_id = u.id
     WHERE c.post_id = $1;
