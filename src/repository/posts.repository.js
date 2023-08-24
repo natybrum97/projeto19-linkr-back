@@ -48,13 +48,14 @@ export const selectPosts = async (token, query) => {
   const { page, qtd } = query;
   const params = [token];
   if (page && qtd) params.push(qtd, (page - 1) * qtd);
+  console.log(params);
 
   const queryString = 'SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1)';
   const { rowCount } = await db.query(queryString, [token]);
   if (rowCount === 0) return "You don't follow anyone yet. Search for new friends!";
 
-  return db.query(`
-    SELECT posts.id, posts."postUrl", posts."postText",
+  return db.query(
+    `SELECT posts.id, posts."postUrl", posts."postText",
       JSON_BUILD_OBJECT(
         'id', users.id,
         'name', users.username,
@@ -63,7 +64,9 @@ export const selectPosts = async (token, query) => {
     FROM posts
     JOIN users ON users.id = posts."idUser"
 
-    WHERE users.id IN (${queryString})
+    WHERE 
+      users.id IN (${queryString})
+      OR users.id = (SELECT sessions."idUser" FROM sessions WHERE token = $1)
 
     ORDER BY posts.id DESC
     ${page && qtd 
@@ -73,8 +76,8 @@ export const selectPosts = async (token, query) => {
 };
 
 export const selectNewPosts = (token, idPosts) => {
-  return db.query(`
-    SELECT posts.id, posts."postUrl", posts."postText",
+  return db.query(
+    `SELECT posts.id, posts."postUrl", posts."postText",
       JSON_BUILD_OBJECT(
         'id', users.id,
         'name', users.username,
