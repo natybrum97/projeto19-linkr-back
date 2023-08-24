@@ -48,7 +48,6 @@ export const selectPosts = async (token, query) => {
   const { page, qtd } = query;
   const params = [token];
   if (page && qtd) params.push(qtd, (page - 1) * qtd);
-  console.log(params);
 
   const queryString = 'SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1)';
   const { rowCount } = await db.query(queryString, [token]);
