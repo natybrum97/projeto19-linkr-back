@@ -48,7 +48,7 @@ export async function FindUserPostsDB(id, query) {
     ;`, [id]
   );
   const { rows } = await db.query(`
-    SELECT posts.id, posts."postText", posts."postUrl",
+    SELECT posts.id, posts."postText", posts."postUrl", (SELECT users.username FROM users WHERE users.id = posts."repostById") AS "repostedBy",
     COUNT(reposts.id) AS "repostCount"
     FROM posts
     LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
