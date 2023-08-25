@@ -49,11 +49,16 @@ export async function FindUserPostsDB(id, query) {
   );
   const { rows } = await db.query(`
     SELECT posts.id, posts."postText", posts."postUrl",
+    (
+      SELECT username
+      FROM users AS users_repost
+      WHERE users_repost.id = reposts."idUserRepost"
+    ) AS "repostedBy",
     COUNT(reposts.id) AS "repostCount"
     FROM posts
     LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
     WHERE posts."idUser" = $1
-    GROUP BY posts.id
+    GROUP BY posts.id, reposts."idUserRepost"
     ${page && qtd 
       ? 'LIMIT $2 OFFSET $3' : ''
     }
