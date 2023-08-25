@@ -29,11 +29,14 @@ export const getHashtagPostsDB = (okHashtag, query) => {
           'id', users.id,
           'name', users.username,
           'pictureUrl', users."pictureUrl"
-        ) AS user
+        ) AS user,
+        COUNT(reposts.id) AS "repostCount"
     FROM posts JOIN users ON users.id = posts."idUser"
         JOIN trends ON posts.id = trends."idPost"
         JOIN hashtags ON hashtags.id = trends."idHashtag"
+        LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
         WHERE hashtags."hashtagText" = $1
+        GROUP BY posts.id, users.id
         ORDER BY posts.id DESC
 
     ${page && qtd 
