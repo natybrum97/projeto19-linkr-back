@@ -25,4 +25,12 @@ export const selectFollow = (idFollowed, token) => {
       "idFollowed" = $2
     ;`, [token, idFollowed]
   );
+};
+
+export const selectFollowedByMe = (token) => {
+  return db.query(`
+    SELECT * FROM follows 
+    WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1)
+    ;`, [token]
+  );
 }

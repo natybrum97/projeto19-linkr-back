@@ -1,4 +1,4 @@
-import { insertFollow, selectFollow } from "../repository/follows.repository.js";
+import { insertFollow, selectFollow, selectFollowedByMe } from "../repository/follows.repository.js";
 
 export const postFollow = async (req, res) => {
   const { authorization } = req.headers;
@@ -18,6 +18,16 @@ export const getFollow = async (req, res) => {
   const { idFollowed } = req.params;
   try {
     const { rows } = await selectFollow(idFollowed, authorization.replace("Bearer ", ""));
+    res.send(rows);
+  } catch ({ detail }) {
+    res.status(500).send({ message: detail });
+  }
+};
+
+export const getfollowedByMe = async (req, res) => {
+  const { authorization } = req.headers;
+  try {
+    const { rows } = await selectFollowedByMe(authorization.replace("Bearer ", ""));
     res.send(rows);
   } catch ({ detail }) {
     res.status(500).send({ message: detail });
