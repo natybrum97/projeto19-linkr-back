@@ -2,10 +2,11 @@ import {
   deletePost,
   insertHashtags,
   insertPost,
+  insertRepostDB,
   insertTrends,
+  postRepostDB,
   selectNewPosts,
   selectPosts,
-  sharePostDB,
   updatePost,
 } from "../repository/posts.repository.js";
 import { selectSessionByToken } from "../repository/sessions.repository.js";
@@ -40,7 +41,6 @@ export const getPosts = async (req, res) => {
   try {
     const posts = await selectPosts(authorization.replace("Bearer ", ""), req.query);
     if (posts === "You don't follow anyone yet. Search for new friends!") return res.send(posts);
-    console.log(posts.rows);
     res.send(posts.rows);
   } catch ({ message }) {
     res.status(500).send(message);
@@ -87,7 +87,9 @@ export const editPostById = async (req, res) => {
 export const sharePost = async (req, res) => {
 
   try {
-    await sharePostDB(req.body);
+    await insertRepostDB(req.body);
+    await postRepostDB(req.body);
+
     res.sendStatus(201);
     
   } catch (error) {
