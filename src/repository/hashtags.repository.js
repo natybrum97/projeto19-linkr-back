@@ -30,14 +30,20 @@ export const getHashtagPostsDB = (okHashtag, query) => {
           'name', users.username,
           'pictureUrl', users."pictureUrl"
         ) AS user,
-        COUNT(reposts.id) AS "repostCount"
-    FROM posts JOIN users ON users.id = posts."idUser"
-        JOIN trends ON posts.id = trends."idPost"
-        JOIN hashtags ON hashtags.id = trends."idHashtag"
-        LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
-        WHERE hashtags."hashtagText" = $1
-        GROUP BY posts.id, users.id
-        ORDER BY posts.id DESC
+        COUNT(reposts.id) AS "repostCount",
+        (
+          SELECT username
+          FROM users AS users_repost
+          WHERE users_repost.id = reposts."idUserRepost"
+        ) AS "repostedBy"
+    FROM posts 
+    JOIN users ON users.id = posts."idUser"
+    JOIN trends ON posts.id = trends."idPost"
+    JOIN hashtags ON hashtags.id = trends."idHashtag"
+    LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
+    WHERE hashtags."hashtagText" = $1
+    GROUP BY posts.id, users.id, reposts."idUserRepost"
+    ORDER BY posts.id DESC
 
     ${page && qtd 
       ? 'LIMIT $2 OFFSET $3' : ''
