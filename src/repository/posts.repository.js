@@ -142,6 +142,12 @@ export const deletePost = async (postId) => {
       );
     `);
 
+    // Exclua o repost, para nao dar erro ao deletar quando um post repostado for deletado
+    await client.query('DELETE FROM reposts WHERE "idOriginalPost" = $1', [postId]);
+
+    // Exclua os comentarios, para nao dar erro ao deletar quando um post tiver comentarios
+    await client.query('DELETE FROM comments WHERE "post_id" = $1', [postId]);
+
     // Finalmente, exclua o post
     await client.query("DELETE FROM posts WHERE id = $1", [postId]);
 
