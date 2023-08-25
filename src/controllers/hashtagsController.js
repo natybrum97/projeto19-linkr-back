@@ -31,6 +31,8 @@ export async function getHashtagPosts(req, res) {
     if (hashtagPosts.rowCount === 0)
       return res.status(404).send({ message: "Sem posts com essa hashtag!" });
 
+      console.log(hashtagPosts.rows);
+
     res.status(200).send(hashtagPosts.rows);
   } catch (err) {
     console.log(err.message);
