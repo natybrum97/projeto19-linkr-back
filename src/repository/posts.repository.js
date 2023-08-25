@@ -154,12 +154,24 @@ export const deletePost = async (postId) => {
   }
 };
 
-export const sharePostDB = async (body) => {
+export const insertRepostDB = async (body) => {
   const { idOriginalPost, idUserOriginalPost, idUserRepost, } = body;
 
   return db.query(`
     INSERT INTO reposts ("idOriginalPost", "idUserOriginalPost", "idUserRepost")
     VALUES ($1, $2, $3)`,
     [idOriginalPost, idUserOriginalPost, idUserRepost]
+  );
+}
+
+export const postRepostDB = async (body) => { 
+  const { idOriginalPost, idUserRepost, } = body;
+
+  return db.query(`
+    INSERT INTO posts ("idUser", "postUrl", "postText", "repostById")
+    SELECT "idUser", "postUrl", "postText", $1
+    FROM posts
+    WHERE id = $2`,
+    [idUserRepost, idOriginalPost]
   );
 }
