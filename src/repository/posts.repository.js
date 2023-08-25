@@ -68,14 +68,19 @@ export const selectPosts = async (token, query) => {
         'name', users.username,
         'pictureUrl', users."pictureUrl"
       ) AS user,
-      COUNT(reposts.id) AS repostCount
+      COUNT(reposts.id) AS repostCount,
+      (
+        SELECT username
+        FROM users AS users_repost
+        WHERE users_repost.id = reposts."idUserRepost"
+      ) AS "repostedBy"
     FROM posts
     JOIN users ON users.id = posts."idUser"
     LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
     WHERE 
       users.id IN (${queryString})
       OR users.id = (SELECT sessions."idUser" FROM sessions WHERE token = $1)
-    GROUP BY posts.id, users.id
+    GROUP BY posts.id, users.id, reposts."idUserRepost"
     ORDER BY posts.id DESC
     ${page && qtd ? "LIMIT $2 OFFSET $3" : ""}
   ;`,
@@ -91,7 +96,12 @@ export const selectNewPosts = (token, idPosts) => {
         'name', users.username,
         'pictureUrl', users."pictureUrl"
       ) AS user,
-      COUNT(reposts.id) AS repostCount
+      COUNT(reposts.id) AS repostCount,
+      (
+        SELECT username
+        FROM users AS users_repost
+        WHERE users_repost.id = reposts."idUserRepost"
+      ) AS "repostedBy"
     FROM posts
     JOIN users ON users.id = posts."idUser"
     LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
@@ -99,7 +109,7 @@ export const selectNewPosts = (token, idPosts) => {
       users.id IN (SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1))
       AND posts.id NOT IN (${idPosts.map((id) => `'${id}'`).join(", ")})
       AND posts.id > ${idPosts[idPosts.length - 1]}
-    GROUP BY posts.id, users.id
+    GROUP BY posts.id, users.id, reposts."idUserRepost"
     ORDER BY posts.id DESC
   ;`,
     [token]
