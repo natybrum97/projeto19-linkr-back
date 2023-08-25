@@ -41,6 +41,7 @@ export const getPosts = async (req, res) => {
   try {
     const posts = await selectPosts(authorization.replace("Bearer ", ""), req.query);
     if (posts === "You don't follow anyone yet. Search for new friends!") return res.send(posts);
+    console.log(posts.rows)
     res.send(posts.rows);
   } catch ({ message }) {
     res.status(500).send(message);

@@ -25,8 +25,9 @@ export const insertHashtags = async (hashtags) => {
   );
   selectedHashtags.rows.forEach(({ id }) => hashtagsIds.push(id));
 
-  const hashTagsToInsert = hashtags.filter((hashtag) =>
-    !selectedHashtags.rows.some(({ hashtagText }) => hashtagText === hashtag)
+  const hashTagsToInsert = hashtags.filter(
+    (hashtag) =>
+      !selectedHashtags.rows.some(({ hashtagText }) => hashtagText === hashtag)
   );
   if (hashTagsToInsert.length === 0) return hashtagsIds;
   const insertedHashtags = await db.query(
@@ -41,7 +42,12 @@ export const insertHashtags = async (hashtags) => {
 };
 
 export const insertTrends = (idPost, hashtagsIds) => {
-  return db.query(`INSERT INTO trends ("idPost", "idHashtag") VALUES ${hashtagsIds.map((_, i) => `(${idPost}, $${i+1})`).join(', ')}`, hashtagsIds);
+  return db.query(
+    `INSERT INTO trends ("idPost", "idHashtag") VALUES ${hashtagsIds
+      .map((_, i) => `(${idPost}, $${i + 1})`)
+      .join(", ")}`,
+    hashtagsIds
+  );
 };
 
 export const selectPosts = async (token, query) => {
@@ -49,9 +55,11 @@ export const selectPosts = async (token, query) => {
   const params = [token];
   if (page && qtd) params.push(qtd, (page - 1) * qtd);
 
-  const queryString = 'SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1)';
+  const queryString =
+    'SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1)';
   const { rowCount } = await db.query(queryString, [token]);
-  if (rowCount === 0) return "You don't follow anyone yet. Search for new friends!";
+  if (rowCount === 0)
+    return "You don't follow anyone yet. Search for new friends!";
 
   return db.query(
     `SELECT posts.id, posts."postUrl", posts."postText", (SELECT users.username FROM users WHERE users.id = posts."repostById") AS "repostedBy",
@@ -60,19 +68,24 @@ export const selectPosts = async (token, query) => {
         'name', users.username,
         'pictureUrl', users."pictureUrl"
       ) AS user,
-      COUNT(reposts.id) AS repostCount
+      COUNT(reposts.id) AS repostCount,
+      (
+        SELECT username
+        FROM users AS users_repost
+        WHERE users_repost.id = reposts."idUserRepost"
+      ) AS "repostedBy"
     FROM posts
     JOIN users ON users.id = posts."idUser"
     LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
     WHERE 
       users.id IN (${queryString})
       OR users.id = (SELECT sessions."idUser" FROM sessions WHERE token = $1)
-    GROUP BY posts.id, users.id
+    GROUP BY posts.id, users.id, reposts."idUserRepost"
     ORDER BY posts.id DESC
-    ${page && qtd 
-      ? 'LIMIT $2 OFFSET $3' : ''
-    }
-  ;`, params);
+    ${page && qtd ? "LIMIT $2 OFFSET $3" : ""}
+  ;`,
+    params
+  );
 };
 
 export const selectNewPosts = (token, idPosts) => {
@@ -83,21 +96,27 @@ export const selectNewPosts = (token, idPosts) => {
         'name', users.username,
         'pictureUrl', users."pictureUrl"
       ) AS user,
-      COUNT(reposts.id) AS repostCount
+      COUNT(reposts.id) AS repostCount,
+      (
+        SELECT username
+        FROM users AS users_repost
+        WHERE users_repost.id = reposts."idUserRepost"
+      ) AS "repostedBy"
     FROM posts
     JOIN users ON users.id = posts."idUser"
     LEFT JOIN reposts ON reposts."idOriginalPost" = posts.id
     WHERE 
       users.id IN (SELECT "idFollowed" FROM follows WHERE "idFollower" = (SELECT sessions."idUser" FROM sessions WHERE token = $1))
-      AND posts.id NOT IN (${idPosts.map(id => `'${id}'`).join(", ")})
-      AND posts.id > ${idPosts[idPosts.length-1]}
-    GROUP BY posts.id, users.id
+      AND posts.id NOT IN (${idPosts.map((id) => `'${id}'`).join(", ")})
+      AND posts.id > ${idPosts[idPosts.length - 1]}
+    GROUP BY posts.id, users.id, reposts."idUserRepost"
     ORDER BY posts.id DESC
-  ;`, [token]);
-}
+  ;`,
+    [token]
+  );
+};
 
 export const updatePost = async (postText, postUrl, idPost) => {
-
   // Exclua as entradas relacionadas às trends primeiro
   await db.query('DELETE FROM trends WHERE "idPost" = $1', [idPost]);
 
@@ -119,7 +138,10 @@ export const updatePost = async (postText, postUrl, idPost) => {
   }
 
   //finalmente atualize o post
-  return db.query('UPDATE posts SET "postText" = $1, "postUrl" = $2 WHERE id = $3;', [postText, postUrl, idPost]);
+  return db.query(
+    'UPDATE posts SET "postText" = $1, "postUrl" = $2 WHERE id = $3;',
+    [postText, postUrl, idPost]
+  );
 };
 
 export const deletePost = async (postId) => {
@@ -161,23 +183,25 @@ export const deletePost = async (postId) => {
 };
 
 export const insertRepostDB = async (body) => {
-  const { idOriginalPost, idUserOriginalPost, idUserRepost, } = body;
+  const { idOriginalPost, idUserOriginalPost, idUserRepost } = body;
 
-  return db.query(`
+  return db.query(
+    `
     INSERT INTO reposts ("idOriginalPost", "idUserOriginalPost", "idUserRepost")
     VALUES ($1, $2, $3)`,
     [idOriginalPost, idUserOriginalPost, idUserRepost]
   );
-}
+};
 
-export const postRepostDB = async (body) => { 
-  const { idOriginalPost, idUserRepost, } = body;
+export const postRepostDB = async (body) => {
+  const { idOriginalPost, idUserRepost } = body;
 
-  return db.query(`
+  return db.query(
+    `
     INSERT INTO posts ("idUser", "postUrl", "postText", "repostById")
     SELECT "idUser", "postUrl", "postText", $1
     FROM posts
     WHERE id = $2`,
     [idUserRepost, idOriginalPost]
   );
-}
+};
