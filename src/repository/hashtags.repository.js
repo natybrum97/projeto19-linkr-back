@@ -24,7 +24,7 @@ export const getHashtagPostsDB = (okHashtag, query) => {
 
   return db.query(
     `
-    SELECT posts.id, posts."postUrl", posts."postText",
+    SELECT posts.id, posts."postUrl", posts."postText", (SELECT users.username FROM users WHERE users.id = posts."repostById") AS "repostedBy",
         JSON_BUILD_OBJECT(
           'id', users.id,
           'name', users.username,

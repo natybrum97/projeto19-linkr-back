@@ -62,7 +62,7 @@ export const selectPosts = async (token, query) => {
     return "You don't follow anyone yet. Search for new friends!";
 
   return db.query(
-    `SELECT posts.id, posts."postUrl", posts."postText",
+    `SELECT posts.id, posts."postUrl", posts."postText", (SELECT users.username FROM users WHERE users.id = posts."repostById") AS "repostedBy",
       JSON_BUILD_OBJECT(
         'id', users.id,
         'name', users.username,
@@ -90,7 +90,7 @@ export const selectPosts = async (token, query) => {
 
 export const selectNewPosts = (token, idPosts) => {
   return db.query(
-    `SELECT posts.id, posts."postUrl", posts."postText",
+    `SELECT posts.id, posts."postUrl", posts."postText", (SELECT users.username FROM users WHERE users.id = posts."repostById") AS "repostedBy",
       JSON_BUILD_OBJECT(
         'id', users.id,
         'name', users.username,
